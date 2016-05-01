@@ -7,6 +7,10 @@
         mc:Ignorable="d"
         Title="Stock Tool" Height="350" Width="525" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Grid>
-        
+        <StackPanel HorizontalAlignment="Left" Height="301" Margin="10,10,0,0" VerticalAlignment="Top" Width="499">
+            <Button x:Name="goButton" Content="Button" Margin="10,10,10,0" Click="goButton_Click"/>
+            <TextBox x:Name="logTextBox" TextWrapping="Wrap" Text="TextBox" Margin="10,10,10,0" Height="145"/>
+        </StackPanel>
+
     </Grid>
 </Window>
