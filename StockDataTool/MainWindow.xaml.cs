@@ -13,7 +13,7 @@ namespace StockDataTool
 
         private void goButton_Click(object sender, RoutedEventArgs e)
         {
-            StockDataLoader.DownloadPricesCsv("AAPL");
+            StockDataLoader.DownloadPricesCsv();
         }
     }
 }
