@@ -21,6 +21,7 @@ namespace StockDataTool
             receiveStream.Close();
             response.Close();
             readStream.Close();
+            System.Diagnostics.Process.Start("result.csv"); //for debug purpose only
         }
 
     }
