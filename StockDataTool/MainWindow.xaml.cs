@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Windows;
 
 
@@ -13,7 +14,13 @@ namespace StockDataTool
 
         private void goButton_Click(object sender, RoutedEventArgs e)
         {
-            StockDataLoader.DownloadPricesCsv();
+            var resultPath = StockDataLoader.DownloadPricesCsv("AAPL", 2006, 2015);
+            var data = StockDataLoader.ReformatPricesCsv(resultPath);
+
+            foreach (string row in data)
+            {
+                logTextBox.Text += row + Environment.NewLine;
+            }
         }
     }
 }
