@@ -4,7 +4,7 @@ namespace StockDataTool
 {
     static class Settings
     {
-        public static List<string> Portfolio = new List<string> { "AAPL", "NVDA", };
+        public static List<string> Portfolio = new List<string> { "AAPL", "NVDA", "FB", "MA"};
 
     }
 }
