@@ -40,9 +40,9 @@ namespace StockDataTool
             return fileName;
         }
 
-        public static void ReformatPricesCsv(string fileName)
+        public static string ReformatPricesCsv(string fileName)
         {
-            if (!File.Exists(fileName))
+            if (!File.Exists(fileName.Replace("long", "short")))
             {
                 var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
                 var sr = new StreamReader(fs);
@@ -77,21 +77,35 @@ namespace StockDataTool
                 file.Close();
                 //System.Diagnostics.Process.Start(fileName); //for debug purpose only
             }
+            return fileName.Replace("long", "short");
         }
 
-        public static void CreateHistoricalData()
+        public static void CreateHistoricalData(string stock, string shortPath, ref Portfolio p)
         {
-            throw new NotImplementedException();
+            var fs = new FileStream(shortPath, FileMode.Open, FileAccess.Read);
+            var sr = new StreamReader(fs);
+            var dataRows = new List<string>();
+            while (!sr.EndOfStream)
+            {
+                dataRows.Add(sr.ReadLine());
+            }
+            sr.Close();
+            fs.Close();
+
+            for (int i = 0; i < dataRows.Count-1; i++)
+            {
+                //0 - Date, 1 - Open, 2 - High, 3 - Low, 4 - Close, 5 - Volume, 6 - Adj Close
+                string[] parts1 = dataRows[i].Split(new char[] { ',' });
+                string[] parts2 = dataRows[i+1].Split(new char[] { ',' });
+                int year = int.Parse(parts1[0].Substring(0, 4));
+                double open = double.Parse(parts2[6].Replace('.', ','));
+                double close = double.Parse(parts1[6].Replace('.', ','));
+                var historyDataRow = new HistoryDataRow(stock, year, open, close);
+                p.HistoryDataRows.Add(historyDataRow);
+            }
 
 
-            //foreach (string row in usefulRows)
-            //{
-            //    MessageBox.Show(row);
-            //}
 
-            //string[] parts = currentRow.Split(new char[] { ',' });
-            //0 - Date, 1 - Open, 2 - High, 3 - Low, 4 - Close, 5 - Volume, 6 - Adj Close
-            //MessageBox.Show(parts[0]);
         }
 
     }

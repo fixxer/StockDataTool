@@ -57,7 +57,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="HistoryDataRow.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Portfolio.cs" />
     <Compile Include="StockDataLoader.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

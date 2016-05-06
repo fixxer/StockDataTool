@@ -21,6 +21,13 @@ namespace StockDataTool
             this.PE = pe;
             this.PB = pb;
         }
+        public HistoryDataRow(string stock, int year, double open, double close)
+        {
+            this.Stock = stock;
+            this.Year = year;
+            this.Open = open;
+            this.Close = close;
+        }
         public HistoryDataRow()
         {
 
