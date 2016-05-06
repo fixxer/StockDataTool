@@ -17,7 +17,7 @@ namespace StockDataTool
             string path = @"http://real-chart.finance.yahoo.com/table.csv";
             string param = "?s=" + ticker + "&a=00&b=1&c=" + startYear + "&d=11&e=31&f=" + endYear + "&g=d&ignore=.csv";
             path += param;
-      
+
             var request = (HttpWebRequest)WebRequest.Create(path);
             var response = (HttpWebResponse)request.GetResponse();
             Stream receiveStream = response.GetResponseStream();
@@ -36,12 +36,12 @@ namespace StockDataTool
             return fileName;
         }
 
-        public static List<string> ReformatPricesCsv(string fileName)
+        public static void ReformatPricesCsv(string fileName)
         {
             var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             var sr = new StreamReader(fs);
             var dataRows = new List<string>();
-            while(!sr.EndOfStream)
+            while (!sr.EndOfStream)
             {
                 dataRows.Add(sr.ReadLine());
             }
@@ -49,21 +49,40 @@ namespace StockDataTool
             fs.Close();
 
             var usefulRows = new List<string>();
-            for (int i = 1; i < dataRows.Count-1; i++)
+            usefulRows.Add(dataRows[1]);
+
+            for (int i = 2; i < dataRows.Count - 1; i++)
             {
-                if(dataRows[i].Substring(0,4) != dataRows[i-1].Substring(0,4))
+                //if (i == 1 || i == dataRows.Count - 1) usefulRows.Add(dataRows[i]);
+                if ((dataRows[i].Substring(0, 4) != dataRows[i - 1].Substring(0, 4)) || (dataRows[i].Substring(0, 4) != dataRows[i + 1].Substring(0, 4)))
                 {
                     usefulRows.Add(dataRows[i]);
                 }
             }
-            return usefulRows;
+            usefulRows.Add(dataRows[dataRows.Count - 1]);
+
+            fileName = fileName.Replace("long", "short");
+            FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
+            StreamWriter sw = new StreamWriter(file);
+            foreach (string row in usefulRows)
+            {
+                sw.WriteLine(row);
+            }
+            sw.Close();
+            file.Close();
+            System.Diagnostics.Process.Start(fileName); //for debug purpose only
+        }
+
+        public static void CreateHistoricalData()
+        {
+            throw new NotImplementedException();
             //foreach (string row in usefulRows)
             //{
             //    MessageBox.Show(row);
             //}
-            
+
             //string[] parts = currentRow.Split(new char[] { ',' });
-            //Date,Open,High,Low,Close,Volume,Adj Close
+            //0 - Date, 1 - Open, 2 - High, 3 - Low, 4 - Close, 5 - Volume, 6 - Adj Close
             //MessageBox.Show(parts[0]);
         }
 

@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StockDataTool"
         mc:Ignorable="d"
-        Title="Stock Tool" Height="350" Width="715" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="Stock Tool" Height="456" Width="715" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Grid>
-        <StackPanel HorizontalAlignment="Left" Height="301" Margin="10,10,0,0" VerticalAlignment="Top" Width="689">
+        <StackPanel HorizontalAlignment="Left" Height="407" Margin="10,10,0,0" VerticalAlignment="Top" Width="689">
             <Button x:Name="goButton" Content="Button" Margin="10,10,10,0" Click="goButton_Click"/>
-            <TextBox x:Name="logTextBox" TextWrapping="Wrap" Margin="10,10,10,0" Height="250"/>
+            <TextBox x:Name="logTextBox" TextWrapping="Wrap" Margin="10,10,10,0" Height="360"/>
         </StackPanel>
 
     </Grid>
