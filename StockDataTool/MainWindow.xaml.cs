@@ -10,8 +10,11 @@ namespace StockDataTool
         public MainWindow()
         {
             InitializeComponent();
-            var resultPath = StockDataLoader.DownloadPricesCsv("AAPL", 2006, 2015);
-            StockDataLoader.ReformatPricesCsv(resultPath);
+            foreach (string stock in Settings.Portfolio)
+            {
+                var resultPath = StockDataLoader.DownloadPricesCsv(stock, 2006, 2015);
+                StockDataLoader.ReformatPricesCsv(resultPath); 
+            }
             this.Close();
         }
 

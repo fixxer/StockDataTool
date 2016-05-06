@@ -70,7 +70,7 @@ namespace StockDataTool
             }
             sw.Close();
             file.Close();
-            System.Diagnostics.Process.Start(fileName); //for debug purpose only
+            //System.Diagnostics.Process.Start(fileName); //for debug purpose only
         }
 
         public static void CreateHistoricalData()
