@@ -17,11 +17,8 @@ namespace StockDataTool
                 var shortPath = StockDataLoader.ReformatPricesCsv(longPath);
                 StockDataLoader.CreateHistoricalData(stock, shortPath, ref portfolio);
             }
-            foreach (HistoryDataRow item in portfolio.HistoryDataRows)
-            {
-                logTextBox.Text += String.Format("{0} - {1} - {2} - {3}\r\n", item.Stock, item.Year, item.Open, item.Close);
-            }
-            //this.Close();
+            StockDataLoader.GenerateMySpreadsheet(ref portfolio);
+            this.Close();
         }
 
         private void goButton_Click(object sender, RoutedEventArgs e)

@@ -103,9 +103,20 @@ namespace StockDataTool
                 var historyDataRow = new HistoryDataRow(stock, year, open, close);
                 p.HistoryDataRows.Add(historyDataRow);
             }
+        }
 
-
-
+        public static void GenerateMySpreadsheet(ref Portfolio p)
+        {
+            string dateStr = DateTime.Now.Ticks.ToString();
+            FileStream fs = new FileStream($"{dateStr}_Stocks.csv", FileMode.CreateNew, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine("Stock;Year;Open;Close");
+            foreach (HistoryDataRow item in p.HistoryDataRows)
+            {
+                sw.WriteLine($"{item.Stock};{item.Year};{item.Open};{item.Close}");
+            }
+            sw.Close();
+            fs.Close();
         }
 
     }
