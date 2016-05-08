@@ -92,7 +92,7 @@ namespace StockDataTool
             sr.Close();
             fs.Close();
 
-            for (int i = 0; i < dataRows.Count-1; i++)
+            for (int i = 0; i < dataRows.Count-1; i+=2)
             {
                 //0 - Date, 1 - Open, 2 - High, 3 - Low, 4 - Close, 5 - Volume, 6 - Adj Close
                 string[] parts1 = dataRows[i].Split(new char[] { ',' });
@@ -110,10 +110,13 @@ namespace StockDataTool
             string dateStr = DateTime.Now.Ticks.ToString();
             FileStream fs = new FileStream($"{dateStr}_Stocks.csv", FileMode.CreateNew, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
-            sw.WriteLine("Stock;Year;Open;Close");
+            sw.WriteLine("Stock;Year;Open;Close;AAR;");
+            int i = 2;
             foreach (HistoryDataRow item in p.HistoryDataRows)
             {
-                sw.WriteLine($"{item.Stock};{item.Year};{item.Open};{item.Close}");
+                string aarFromula = $"=((D{i}/C{i})*100)-100";
+                sw.WriteLine($"{item.Stock};{item.Year};{item.Open};{item.Close};{aarFromula};");
+                i++;
             }
             sw.Close();
             fs.Close();
