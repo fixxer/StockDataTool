@@ -11,10 +11,12 @@ namespace StockDataTool
     class StockDataLoader
     {
         //http://financials.morningstar.com/valuation/price-ratio.html?t=AAPL
+        //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
+        //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
 
         public static string DownloadPricesCsv(string ticker, int startYear, int endYear)
         {
-            string fileName = String.Format("{0}_{1}_{2}_long.csv", ticker, startYear, endYear);
+            string fileName = $"{ticker}_{startYear}_{endYear}_long.csv";
             if (!File.Exists(fileName))
             {
 
@@ -54,8 +56,7 @@ namespace StockDataTool
                 sr.Close();
                 fs.Close();
 
-                var usefulRows = new List<string>();
-                usefulRows.Add(dataRows[1]);
+                var usefulRows = new List<string> {dataRows[1]};
 
                 for (int i = 2; i < dataRows.Count - 1; i++)
                 {
