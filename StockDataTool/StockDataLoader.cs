@@ -13,6 +13,10 @@ namespace StockDataTool
         //http://financials.morningstar.com/valuation/price-ratio.html?t=AAPL
         //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
         //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
+        
+        //http://www.nasdaq.com/screening/company-list.aspx
+        //http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Technology&exchange=NYSE
+        //http://bsym.bloomberg.com/sym/
 
         public static string DownloadPricesCsv(string ticker, int startYear, int endYear)
         {
