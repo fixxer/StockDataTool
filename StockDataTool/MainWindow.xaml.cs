@@ -10,14 +10,25 @@ namespace StockDataTool
         public MainWindow()
         {
             InitializeComponent();
+
+            //0. Downloading available tickers
+            StockDataLoader.GetAllTickers();
+
+            // 1. Building Portfolio: Tickers. Curerntly the list is pre-defined, may be switched to downloaded at {0}
             Portfolio portfolio = new Portfolio();
-            StockDataLoader.GetAllTickers(portfolio);
-            foreach (string stock in portfolio.Stocks)
+
+            //2. Downloading historical prices data
+            
+            foreach (Stock stock in portfolio.Stocks)
             {
-                var longPath = StockDataLoader.DownloadPricesCsv(stock, 2006, 2015);
+                var longPath = StockDataLoader.DownloadPricesCsv(stock.Ticker, 2006, 2015);
                 var shortPath = StockDataLoader.ReformatPricesCsv(longPath);
                 StockDataLoader.CreateHistoricalData(stock, shortPath, ref portfolio);
             }
+
+            //3. 
+
+            //n. Generating output
             StockDataLoader.GenerateMySpreadsheet(ref portfolio);
             this.Close();
         }

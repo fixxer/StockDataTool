@@ -1,5 +1,7 @@
 ﻿
 
+using System.Collections.Generic;
+
 namespace StockDataTool
 {
 	
@@ -29,6 +31,7 @@ http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportati
 		public string Ticker { get; set; }
         public Exchange Exchange { get; set; }
         public string Industry { get; set; }
+        public List<HistoryDataRow> dataRows { get; set; }
         /*
 		stock type
 		stock style
@@ -42,5 +45,13 @@ http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportati
 		PB
 		Divident Yield
 		*/
+
+        public Stock() { dataRows = new List<HistoryDataRow>(); }
+        public Stock(string ticker, Exchange ex)
+        {
+            Ticker = ticker;
+            Exchange = ex;
+            dataRows = new List<HistoryDataRow>();
+        }
     }
 }

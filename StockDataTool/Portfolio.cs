@@ -4,10 +4,10 @@ namespace StockDataTool
 {
     class Portfolio
     {
-        public List<string> Stocks;
-        public List<HistoryDataRow> HistoryDataRows;
+        public List<Stock> Stocks;
+        //public List<HistoryDataRow> HistoryDataRows;
 
-        public List<string> Industries = new List<string>
+        public static List<string> Industries = new List<string>
         {
             "Basic+Industries",
             "Capital+Goods",
@@ -25,8 +25,12 @@ namespace StockDataTool
 
         public Portfolio()
         {
-            Stocks = new List<string> { "AAPL", "NVDA", "FB", "MA" };
-            HistoryDataRows = new List<HistoryDataRow>();
+            Stocks = new List<Stock>();
+            Stocks.Add(new Stock("AAPL", Exchange.NASDAQ));
+            Stocks.Add(new Stock("NVDA", Exchange.NASDAQ));
+            Stocks.Add(new Stock("FB", Exchange.NASDAQ));
+            Stocks.Add(new Stock("MA", Exchange.NYSE));
+            //HistoryDataRows = new List<HistoryDataRow>();
         }
 
     }

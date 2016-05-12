@@ -11,25 +11,28 @@ namespace StockDataTool
     class StockDataLoader
     {
 
-        public static void GetAllTickers(Portfolio p)
+        public static void GetAllTickers()
         {
             //http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
             //http://bsym.bloomberg.com/sym/ - not used
-            foreach (string industry in p.Industries)
+            foreach (string industry in Portfolio.Industries)
             {
                 string nasdaqPath = $"http://nasdaq.com/screening/companies-by-industry.aspx?industry={industry}&exchange=NASDAQ&render=download";
                 string localPath = $"NASDAQ_{industry}.csv";
-                var request = (HttpWebRequest)WebRequest.Create(nasdaqPath);
-                var response = (HttpWebResponse)request.GetResponse();
-                Stream receiveStream = response.GetResponseStream();
-                StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-               
-                FileStream file = new FileStream(localPath, FileMode.Create, FileAccess.ReadWrite);
-                receiveStream.CopyTo(file);
-                receiveStream.Close();
-                response.Close();
-                readStream.Close();
-                file.Close();
+                if (!File.Exists(localPath))
+                {
+                    var request = (HttpWebRequest)WebRequest.Create(nasdaqPath);
+                    var response = (HttpWebResponse)request.GetResponse();
+                    Stream receiveStream = response.GetResponseStream();
+                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+
+                    FileStream file = new FileStream(localPath, FileMode.Create, FileAccess.ReadWrite);
+                    receiveStream.CopyTo(file);
+                    receiveStream.Close();
+                    response.Close();
+                    readStream.Close();
+                    file.Close();
+                }
             }
         }
 
@@ -85,7 +88,7 @@ namespace StockDataTool
                 sr.Close();
                 fs.Close();
 
-                var usefulRows = new List<string> {dataRows[1]};
+                var usefulRows = new List<string> { dataRows[1] };
 
                 for (int i = 2; i < dataRows.Count - 1; i++)
                 {
@@ -110,7 +113,7 @@ namespace StockDataTool
             return fileName.Replace("long", "short");
         }
 
-        public static void CreateHistoricalData(string stock, string shortPath, ref Portfolio p)
+        public static void CreateHistoricalData(Stock stock, string shortPath, ref Portfolio p)
         {
             var fs = new FileStream(shortPath, FileMode.Open, FileAccess.Read);
             var sr = new StreamReader(fs);
@@ -122,16 +125,25 @@ namespace StockDataTool
             sr.Close();
             fs.Close();
 
-            for (int i = 0; i < dataRows.Count-1; i+=2)
+            for (int i = 0; i < dataRows.Count - 1; i += 2)
             {
                 //0 - Date, 1 - Open, 2 - High, 3 - Low, 4 - Close, 5 - Volume, 6 - Adj Close
                 string[] parts1 = dataRows[i].Split(new char[] { ',' });
-                string[] parts2 = dataRows[i+1].Split(new char[] { ',' });
+                string[] parts2 = dataRows[i + 1].Split(new char[] { ',' });
                 int year = int.Parse(parts1[0].Substring(0, 4));
                 double open = double.Parse(parts2[6].Replace('.', ','));
                 double close = double.Parse(parts1[6].Replace('.', ','));
-                var historyDataRow = new HistoryDataRow(stock, year, open, close);
-                p.HistoryDataRows.Add(historyDataRow);
+                var historyDataRow = new HistoryDataRow(stock.Ticker, year, open, close);
+                stock.dataRows.Add(historyDataRow);
+                //p.HistoryDataRows.Add();
+            }
+        }
+
+        public static void EnrichStocksWithAAR(Portfolio p)
+        {
+            foreach (Stock stock in p.Stocks)
+            {
+
             }
         }
 
@@ -140,13 +152,28 @@ namespace StockDataTool
             string dateStr = DateTime.Now.Ticks.ToString();
             FileStream fs = new FileStream($"{dateStr}_Stocks.csv", FileMode.CreateNew, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
-            sw.WriteLine("Stock;Year;Open;Close;AAR;");
+
             int i = 2;
-            foreach (HistoryDataRow item in p.HistoryDataRows)
+            //write stocks part
+            foreach (Stock stock in p.Stocks)
             {
-                string aarFromula = $"=((D{i}/C{i})*100)-100";
-                sw.WriteLine($"{item.Stock};{item.Year};{item.Open};{item.Close};{aarFromula};");
+                string stockInfo = $"{stock.Ticker};{stock.Industry};";
+                sw.WriteLine(stockInfo);
                 i++;
+            }
+
+            //write history rows part
+            sw.WriteLine();
+            sw.WriteLine("Stock;Year;Open;Close;Return;");
+            i += 1;
+            foreach (Stock stock in p.Stocks)
+            {
+                foreach (HistoryDataRow item in stock.dataRows)
+                {
+                    string aarFromula = $"=((D{i}/C{i})*100)-100";
+                    sw.WriteLine($"{item.Stock};{item.Year};{item.Open};{item.Close};{aarFromula};");
+                    i++;
+                }
             }
             sw.Close();
             fs.Close();
