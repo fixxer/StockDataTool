@@ -22,19 +22,14 @@ http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportati
     {
         NASDAQ, NYSE,
     }
-    public enum Sector
-    {
-        a,b,c
-    }
+    
 
     class Stock
     {
 		public string Ticker { get; set; }
         public Exchange Exchange { get; set; }
-        public Sector Sector { get; set; }
+        public string Industry { get; set; }
         /*
-		sector
-		industry
 		stock type
 		stock style
 		aar

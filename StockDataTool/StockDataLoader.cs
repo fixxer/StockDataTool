@@ -10,13 +10,26 @@ namespace StockDataTool
 {
     class StockDataLoader
     {
-        //http://financials.morningstar.com/valuation/price-ratio.html?t=AAPL
-        //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
-        //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
-        
-        //http://www.nasdaq.com/screening/company-list.aspx
-        //http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Technology&exchange=NYSE
-        //http://bsym.bloomberg.com/sym/
+
+        public static void GetAllTickers(Portfolio p)
+        {
+            //http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
+            //http://bsym.bloomberg.com/sym/ - not used
+            foreach (string industry in p.Industries)
+            {
+
+            }
+        }
+
+
+        public static void GetMorningstarData(Stock s)
+        {
+            //http://financials.morningstar.com/valuation/price-ratio.html?t=AAPL
+            //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
+            //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
+            throw new NotImplementedException();
+        }
+
 
         public static string DownloadPricesCsv(string ticker, int startYear, int endYear)
         {
