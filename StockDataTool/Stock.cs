@@ -2,10 +2,16 @@
 
 namespace StockDataTool
 {
+    public enum ExchangeEnum
+    {
+        NASDAQ, NYSE,
+    }
+
     class Stock
     {
 		public string Ticker { get; set; }
-		/*
+        public ExchangeEnum Exchange { get; set; }
+        /*
 		sector
 		industry
 		stock type
