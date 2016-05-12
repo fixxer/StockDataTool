@@ -2,15 +2,20 @@
 
 namespace StockDataTool
 {
-    public enum ExchangeEnum
+    public enum Exchange
     {
         NASDAQ, NYSE,
+    }
+    public enum Sector
+    {
+        a,b,c
     }
 
     class Stock
     {
 		public string Ticker { get; set; }
-        public ExchangeEnum Exchange { get; set; }
+        public Exchange Exchange { get; set; }
+        public Sector Sector { get; set; }
         /*
 		sector
 		industry
