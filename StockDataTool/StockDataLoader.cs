@@ -17,7 +17,19 @@ namespace StockDataTool
             //http://bsym.bloomberg.com/sym/ - not used
             foreach (string industry in p.Industries)
             {
-
+                string nasdaqPath = $"http://nasdaq.com/screening/companies-by-industry.aspx?industry={industry}&exchange=NASDAQ&render=download";
+                string localPath = $"NASDAQ_{industry}.csv";
+                var request = (HttpWebRequest)WebRequest.Create(nasdaqPath);
+                var response = (HttpWebResponse)request.GetResponse();
+                Stream receiveStream = response.GetResponseStream();
+                StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+               
+                FileStream file = new FileStream(localPath, FileMode.Create, FileAccess.ReadWrite);
+                receiveStream.CopyTo(file);
+                receiveStream.Close();
+                response.Close();
+                readStream.Close();
+                file.Close();
             }
         }
 

@@ -11,6 +11,7 @@ namespace StockDataTool
         {
             InitializeComponent();
             Portfolio portfolio = new Portfolio();
+            StockDataLoader.GetAllTickers(portfolio);
             foreach (string stock in portfolio.Stocks)
             {
                 var longPath = StockDataLoader.DownloadPricesCsv(stock, 2006, 2015);
