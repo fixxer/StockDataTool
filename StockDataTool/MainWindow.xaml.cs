@@ -18,7 +18,6 @@ namespace StockDataTool
             Portfolio portfolio = new Portfolio();
 
             //2. Downloading historical prices data
-            
             foreach (Stock stock in portfolio.Stocks)
             {
                 var longPath = StockDataLoader.DownloadPricesCsv(stock.Ticker, 2006, 2015);
@@ -26,18 +25,23 @@ namespace StockDataTool
                 StockDataLoader.CreateHistoricalData(stock, shortPath, ref portfolio);
             }
 
-            //3. 
+            //3. Enriching stocks with AAR data
+            StockDataLoader.EnrichStocksWithAAR(portfolio);
 
-            //n. Generating output
+            /*n. Generating output. Currently contains:
+                - raw data in rows
+                - ticker
+                - AAR
+            */
             StockDataLoader.GenerateMySpreadsheet(ref portfolio);
             this.Close();
         }
 
         private void goButton_Click(object sender, RoutedEventArgs e)
         {
-            
 
-            
+
+
         }
 
         private void Window_Closed(object sender, EventArgs e)

@@ -27,6 +27,7 @@ namespace StockDataTool
             this.Year = year;
             this.Open = open;
             this.Close = close;
+            this.AnnualReturn = ((close / open) * 100) - 100;
         }
         public HistoryDataRow()
         {

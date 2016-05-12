@@ -143,7 +143,14 @@ namespace StockDataTool
         {
             foreach (Stock stock in p.Stocks)
             {
-
+                double aar = 0;
+                int years = stock.dataRows.Count;
+                foreach (var row in stock.dataRows)
+                {
+                    aar += row.AnnualReturn;
+                }
+                aar = aar / years;
+                stock.AAR = aar;
             }
         }
 
@@ -153,11 +160,12 @@ namespace StockDataTool
             FileStream fs = new FileStream($"{dateStr}_Stocks.csv", FileMode.CreateNew, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
 
-            int i = 2;
+            int i = 1; //counter of used rows for correct file generation
             //write stocks part
             foreach (Stock stock in p.Stocks)
             {
-                string stockInfo = $"{stock.Ticker};{stock.Industry};";
+                string aarString = stock.AAR.ToString().Replace(',', '.');
+                string stockInfo = $"{stock.Ticker};{stock.Industry};{aarString};";
                 sw.WriteLine(stockInfo);
                 i++;
             }
@@ -165,13 +173,15 @@ namespace StockDataTool
             //write history rows part
             sw.WriteLine();
             sw.WriteLine("Stock;Year;Open;Close;Return;");
-            i += 1;
+            i += 2;
             foreach (Stock stock in p.Stocks)
             {
                 foreach (HistoryDataRow item in stock.dataRows)
                 {
-                    string aarFromula = $"=((D{i}/C{i})*100)-100";
-                    sw.WriteLine($"{item.Stock};{item.Year};{item.Open};{item.Close};{aarFromula};");
+                    string arFromula = $"=((D{i}/C{i})*100)-100";
+                    string openPrice = item.Open.ToString().Replace(',','.');
+                    string closePrice = item.Close.ToString().Replace(',', '.');
+                    sw.WriteLine($"{item.Stock};{item.Year};{openPrice};{closePrice};{arFromula};");
                     i++;
                 }
             }
