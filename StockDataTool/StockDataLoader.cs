@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 //using System.Web;
 using System.Windows;
+using System.Linq;
 
 namespace StockDataTool
 {
@@ -154,18 +155,35 @@ namespace StockDataTool
             }
         }
 
+        public static void EnrichStocksWithSTD(Portfolio p)
+        {
+            foreach (Stock stock in p.Stocks)
+            {
+                var returns = new List<double>();
+                foreach (var row in stock.dataRows)
+                {
+                    returns.Add(row.AnnualReturn);
+                }
+                double average = returns.Average();
+                double sumOfSquaresOfDifferences = returns.Sum(val => (val - average) * (val - average));
+                stock.STD = Math.Sqrt(sumOfSquaresOfDifferences / returns.Count-1);
+            }
+        }
+
         public static void GenerateMySpreadsheet(ref Portfolio p)
         {
             string dateStr = DateTime.Now.Ticks.ToString();
             FileStream fs = new FileStream($"{dateStr}_Stocks.csv", FileMode.CreateNew, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs);
 
-            int i = 1; //counter of used rows for correct file generation
+            int i = 2; //counter of used rows for correct file generation
             //write stocks part
+            sw.WriteLine("Stock;Industry;AAR;STD;Retrun-Risk ratio;");
             foreach (Stock stock in p.Stocks)
             {
                 string aarString = stock.AAR.ToString().Replace(',', '.');
-                string stockInfo = $"{stock.Ticker};{stock.Industry};{aarString};";
+                string stdString = stock.STD.ToString().Replace(',', '.');
+                string stockInfo = $"{stock.Ticker};{stock.Industry};{aarString};{stdString};=C{i}/D{i};";
                 sw.WriteLine(stockInfo);
                 i++;
             }

@@ -33,6 +33,7 @@ http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportati
         public string Industry { get; set; }
         public List<HistoryDataRow> dataRows { get; set; }
         public double AAR { get; set; }
+        public double STD { get; set; }
         /*
 		stock type
 		stock style

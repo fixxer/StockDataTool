@@ -28,6 +28,9 @@ namespace StockDataTool
             //3. Enriching stocks with AAR data
             StockDataLoader.EnrichStocksWithAAR(portfolio);
 
+            //4. Enrick stocks with STDs
+            StockDataLoader.EnrichStocksWithSTD(portfolio);
+
             /*n. Generating output. Currently contains:
                 - raw data in rows
                 - ticker
