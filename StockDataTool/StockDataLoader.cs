@@ -6,6 +6,7 @@ using System.Text;
 //using System.Web;
 using System.Windows;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace StockDataTool
 {
@@ -40,10 +41,26 @@ namespace StockDataTool
 
         public static void GetMorningstarData(Stock s)
         {
+            throw new NotImplementedException();
             //http://financials.morningstar.com/valuation/price-ratio.html?t=AAPL
             //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
             //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
-            throw new NotImplementedException();
+
+            string exchange = s.Exchange == Exchange.NYSE ? "XNYS" : "XNAS";
+            string path = $"http://financials.morningstar.com/valuate/current-valuation-list.action?&t={exchange}:{s.Ticker}";
+
+            var request = (HttpWebRequest)WebRequest.Create(path);
+            var response = (HttpWebResponse)request.GetResponse();
+            Stream receiveStream = response.GetResponseStream();
+            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+            XElement root = XElement.Load(readStream);
+            //string result = readStream.ReadToEnd();
+            receiveStream.Close();
+            response.Close();
+            readStream.Close();
+            //var tr = from el in root.Elements() select el;
+            var tr = root.Elements("tr").Where(row => row.Element("th").ToString() == "Price/Earnings");
+
         }
 
 
