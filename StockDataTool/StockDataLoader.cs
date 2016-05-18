@@ -21,19 +21,35 @@ namespace StockDataTool
             {
                 string nasdaqPath = $"http://nasdaq.com/screening/companies-by-industry.aspx?industry={industry}&exchange=NASDAQ&render=download";
                 string localPath = $"NASDAQ_{industry}.csv";
+                string tickersPath = $"NASDAQ_{industry}_tickers.txt";
                 if (!File.Exists(localPath))
                 {
                     var request = (HttpWebRequest)WebRequest.Create(nasdaqPath);
                     var response = (HttpWebResponse)request.GetResponse();
                     Stream receiveStream = response.GetResponseStream();
                     StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-
                     FileStream file = new FileStream(localPath, FileMode.Create, FileAccess.ReadWrite);
                     receiveStream.CopyTo(file);
                     receiveStream.Close();
                     response.Close();
                     readStream.Close();
                     file.Close();
+
+                    FileStream localFile = new FileStream(localPath, FileMode.Open, FileAccess.Read);
+                    StreamReader sr = new StreamReader(localFile);
+                    FileStream tickerFile = new FileStream(tickersPath, FileMode.Create, FileAccess.Write);
+                    StreamWriter sw = new StreamWriter(tickerFile);
+                    sr.ReadLine();//skipping one line with headers
+                    while (!sr.EndOfStream)
+                    {
+                        var line = sr.ReadLine();
+                        var ticker = line.Split(new char[] { ',' })[0].Replace("\"","");
+                        sw.WriteLine(ticker);
+                    }
+                    sr.Close();
+                    sw.Close();
+                    localFile.Close();
+                    tickerFile.Close();
                 }
             }
         }
