@@ -62,7 +62,7 @@ namespace StockDataTool
             //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
             //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
 
-            string exchange = s.Exchange == Exchange.NYSE ? "XNYS" : "XNAS";
+            string exchange = s.Exchange == Exchange.NASDAQ? "XNAS": "XNYS";
             string path = $"http://financials.morningstar.com/valuate/current-valuation-list.action?&t={exchange}:{s.Ticker}";
 
             var request = (HttpWebRequest)WebRequest.Create(path);
@@ -76,7 +76,14 @@ namespace StockDataTool
             result = result.Trim().Replace("S&P", "SnP").Replace("&nbsp;", " ").Replace("&ndash;", "-").Replace("&mdash;", "-");
 
             XElement root = XElement.Parse(result);
-            var tr = root.Elements("tr").Where(row => row.Element("th").ToString() == "Price/Earnings");
+            var tbody = root.Element("tbody");
+            var tr = from el in tbody.Elements("tr") where (string)el.Element("th") == @"Price/Earnings" select el;
+            var tds = tr.Elements("td");
+            var stockPE = tds.ElementAt(0).Value;
+            var industryPE = tds.ElementAt(1).Value;
+
+            s.PE = double.Parse(stockPE.Replace('.',','));
+            s.industryPE = double.Parse(industryPE.Replace('.', ','));
 
         }
 
@@ -212,12 +219,14 @@ namespace StockDataTool
 
             int i = 2; //counter of used rows for correct file generation
             //write stocks part
-            sw.WriteLine("Stock;Industry;AAR;STD;Retrun-Risk ratio;");
+            sw.WriteLine("Stock;Industry;AAR;STD;Retrun-Risk ratio;P/E;Industry P/E;");
             foreach (Stock stock in p.Stocks)
             {
                 string aarString = stock.AAR.ToString().Replace(',', '.');
                 string stdString = stock.STD.ToString().Replace(',', '.');
-                string stockInfo = $"{stock.Ticker};{stock.Industry};{aarString};{stdString};=C{i}/D{i};";
+                string peString = stock.PE.ToString().Replace(',', '.');
+                string indPeString = stock.industryPE.ToString().Replace(',', '.');
+                string stockInfo = $"{stock.Ticker};{stock.Industry};{aarString};{stdString};=C{i}/D{i};{peString};{indPeString};";
                 sw.WriteLine(stockInfo);
                 i++;
             }

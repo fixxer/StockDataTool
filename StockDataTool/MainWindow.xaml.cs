@@ -28,8 +28,14 @@ namespace StockDataTool
             //3. Enriching stocks with AAR data
             StockDataLoader.EnrichStocksWithAAR(portfolio);
 
-            //4. Enrick stocks with STDs
+            //4. Enriching stocks with STDs
             StockDataLoader.EnrichStocksWithSTD(portfolio);
+
+            //5. Enriching stocks with P/Es
+            foreach (Stock stock in portfolio.Stocks)
+            {
+                StockDataLoader.GetMorningstarData(stock);
+            }
 
             /*n. Generating output. Currently contains:
                 - raw data in rows

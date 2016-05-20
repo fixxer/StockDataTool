@@ -34,16 +34,14 @@ http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportati
         public List<HistoryDataRow> dataRows { get; set; }
         public double AAR { get; set; }
         public double STD { get; set; }
+        public double PE { get;set;}
+        public double industryPE { get; set; }
         /*
 		stock type
 		stock style
-		aar
-		std
 		RR
-		PE
-		avg.PE
 		max.PE
-		ind.avg.PE
+		avg.PE
 		PB
 		Divident Yield
 		*/

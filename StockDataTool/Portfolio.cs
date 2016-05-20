@@ -29,9 +29,9 @@ namespace StockDataTool
             Stocks.Add(new Stock("MSFT", Exchange.NASDAQ));
             Stocks.Add(new Stock("FB", Exchange.NASDAQ));
             Stocks.Add(new Stock("AMZN", Exchange.NASDAQ));
-            Stocks.Add(new Stock("DIS", Exchange.NASDAQ));
+            Stocks.Add(new Stock("DIS", Exchange.NYSE));
             Stocks.Add(new Stock("NVDA", Exchange.NASDAQ));
-            Stocks.Add(new Stock("ATVI", Exchange.NYSE));
+            Stocks.Add(new Stock("ATVI", Exchange.NASDAQ));
         }
 
     }
