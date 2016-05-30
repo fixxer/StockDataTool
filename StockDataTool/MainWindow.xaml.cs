@@ -61,10 +61,12 @@ namespace StockDataTool
             bw.ReportProgress(100, "...done!\r\n");
 
             //5. Enriching stocks with P/Es
-            bw.ReportProgress(110, "Enriching PEs");
+            bw.ReportProgress(110, "Enriching PEs and PBs\r\n");
             foreach (Stock stock in portfolio.Stocks)
             {
-                StockDataLoader.GetMorningstarData(stock);
+                StockDataLoader.GetCurrentMorningstarData(stock);
+                bw.ReportProgress(110, $"\tEnriching:{stock.Ticker}\r\n");
+                StockDataLoader.GetHistoricalMorningstarData(stock);
             }
             bw.ReportProgress(120, "...done!\r\n");
 

@@ -55,12 +55,16 @@ namespace StockDataTool
         }
 
 
-        public static void GetMorningstarData(Stock s)
+        public static void GetHistoricalMorningstarData(Stock s)
         {
-            //throw new NotImplementedException();
+            //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
+        }
+
+        public static void GetCurrentMorningstarData(Stock s)
+        {
             //http://financials.morningstar.com/valuation/price-ratio.html?t=AAPL
             //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
-            //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
+
 
             string exchange = s.Exchange == Exchange.NASDAQ? "XNAS": "XNYS";
             string path = $"http://financials.morningstar.com/valuate/current-valuation-list.action?&t={exchange}:{s.Ticker}";
@@ -77,6 +81,7 @@ namespace StockDataTool
 
             XElement root = XElement.Parse(result);
             var tbody = root.Element("tbody");
+            //PE
             var tr = from el in tbody.Elements("tr") where (string)el.Element("th") == @"Price/Earnings" select el;
             var tds = tr.Elements("td");
             var stockPE = tds.ElementAt(0).Value;
@@ -84,6 +89,15 @@ namespace StockDataTool
 
             s.PE = double.Parse(stockPE.Replace('.',','));
             s.industryPE = double.Parse(industryPE.Replace('.', ','));
+
+            //PB
+            tr = from el in tbody.Elements("tr") where (string)el.Element("th") == @"Price/Book" select el;
+            tds = tr.Elements("td");
+            var stockPB = tds.ElementAt(0).Value;
+            var industryPB = tds.ElementAt(1).Value;
+
+            s.PB = double.Parse(stockPB.Replace('.', ','));
+            s.industryPB = double.Parse(industryPB.Replace('.', ','));
 
         }
 
@@ -219,14 +233,16 @@ namespace StockDataTool
 
             int i = 2; //counter of used rows for correct file generation
             //write stocks part
-            sw.WriteLine("Stock;Sector;Industry;Stock Type;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);max P/E (10 years);Industry avg. P/E;P/B as of 2016;Divident Yield;");
+            sw.WriteLine("Stock;Sector;Industry;Stock Type;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);max P/E (10 years);Industry avg. P/E;P/B as of 2016;Industry avg. P/B;Divident Yield;");
             foreach (Stock stock in p.Stocks)
             {
                 string aarString = stock.AAR.ToString().Replace(',', '.');
                 string stdString = stock.STD.ToString().Replace(',', '.');
                 string peString = stock.PE.ToString().Replace(',', '.');
                 string indPeString = stock.industryPE.ToString().Replace(',', '.');
-                string stockInfo = $"{stock.Ticker};sector;{stock.Industry};type;style;{aarString};{stdString};=C{i}/D{i};{peString};avgPE;maxPE;{indPeString};pb;yield;";
+                string pbString = stock.PB.ToString().Replace(',', '.');
+                string indPbString = stock.industryPB.ToString().Replace(',', '.');
+                string stockInfo = $"{stock.Ticker};sector;{stock.Industry};type;style;{aarString};{stdString};=C{i}/D{i};{peString};avgPE;maxPE;{indPeString};{pbString};{indPbString};yield;";
                 sw.WriteLine(stockInfo);
                 i++;
             }
