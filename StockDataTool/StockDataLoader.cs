@@ -57,7 +57,19 @@ namespace StockDataTool
 
         public static void GetHistoricalMorningstarData(Stock s)
         {
-            //http://financials.morningstar.com/valuate/valuation-history.action?&t=XNAS:AAPL&type=price-earnings
+            string exchange = s.Exchange == Exchange.NASDAQ ? "XNAS" : "XNYS";
+            string path = $"http://financials.morningstar.com/valuate/valuation-history.action?&t={exchange}:{s.Ticker}&type=price-earnings";
+
+            var request = (HttpWebRequest)WebRequest.Create(path);
+            var response = (HttpWebResponse)request.GetResponse();
+            Stream receiveStream = response.GetResponseStream();
+            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+            string result = readStream.ReadToEnd();
+            receiveStream.Close();
+            response.Close();
+            readStream.Close();
+            result = result.Trim().Replace("S&P", "SnP").Replace("&nbsp;", " ").Replace("&ndash;", "-").Replace("&mdash;", "-");
+            //XElement root = XElement.Parse(result);
         }
 
         public static void GetCurrentMorningstarData(Stock s)
