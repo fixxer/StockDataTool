@@ -219,14 +219,14 @@ namespace StockDataTool
 
             int i = 2; //counter of used rows for correct file generation
             //write stocks part
-            sw.WriteLine("Stock;Industry;AAR;STD;Retrun-Risk ratio;P/E;Industry P/E;");
+            sw.WriteLine("Stock;Sector;Industry;Stock Type;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);max P/E (10 years);Industry avg. P/E;P/B as of 2016;Divident Yield;");
             foreach (Stock stock in p.Stocks)
             {
                 string aarString = stock.AAR.ToString().Replace(',', '.');
                 string stdString = stock.STD.ToString().Replace(',', '.');
                 string peString = stock.PE.ToString().Replace(',', '.');
                 string indPeString = stock.industryPE.ToString().Replace(',', '.');
-                string stockInfo = $"{stock.Ticker};{stock.Industry};{aarString};{stdString};=C{i}/D{i};{peString};{indPeString};";
+                string stockInfo = $"{stock.Ticker};sector;{stock.Industry};type;style;{aarString};{stdString};=C{i}/D{i};{peString};avgPE;maxPE;{indPeString};pb;yield;";
                 sw.WriteLine(stockInfo);
                 i++;
             }
