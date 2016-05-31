@@ -44,7 +44,7 @@ namespace StockDataTool
                     while (!sr.EndOfStream)
                     {
                         var line = sr.ReadLine();
-                        var ticker = line.Split(new char[] { ',' })[0].Replace("\"","");
+                        var ticker = line.Split(new char[] { ',' })[0].Replace("\"", "");
                         sw.WriteLine(ticker);
                     }
                     sr.Close();
@@ -74,30 +74,38 @@ namespace StockDataTool
             XElement root = XElement.Parse(result);
             var tbody = root.Element("div").Element("table").Element("tbody");
             var trs = tbody.Elements().ToArray();
+            //PEs
             var stockPEs = trs[1].Elements("td").ToList();
             stockPEs.Reverse();
-            for(int i = 1; i < stockPEs.Count; i++)//last one is the current one - we need to skip it
+            for (int i = 1; i < stockPEs.Count; i++)//last one is the current one - we need to skip it
             {
+                if (i > s.dataRows.Count) break;
                 double nextPE = 0;
-                if(double.TryParse((stockPEs[i].Value).Replace('.', ','), out nextPE))
+                if (double.TryParse((stockPEs[i].Value).Replace('.', ','), out nextPE))
                 {
-                    s.dataRows[i-1].PE = nextPE;
+                    s.dataRows[i - 1].PE = nextPE;
                 }
                 else
-                break;
+                    s.dataRows[i - 1].PE = 0;
 
             }
+            //PBs
+            var stockPBs = trs[4].Elements("td").ToList();
+            stockPBs.Reverse();
+            for (int i = 1; i < stockPBs.Count; i++)//last one is the current one - we need to skip it
+            {
+                if (i > s.dataRows.Count) break;
+                double nextPB = 0;
+                if (double.TryParse((stockPBs[i].Value).Replace('.', ','), out nextPB))
+                {
+                    s.dataRows[i - 1].PB = nextPB;
+                }
+                else
+                    s.dataRows[i - 1].PB = 0;
+            }
+
             //var avgPEs = trs[2];
-            var stockPBs = trs[4].Elements("tr");
             //var avgPBs = trs[5];
-
-
-            //var tbody = root.Element("tbody");
-            ////PE
-            //var tr = from el in tbody.Elements("tr") where (string)el.Element("th") == @"Price/Earnings" select el;
-            //var tds = tr.Elements("td");
-            //var stockPE = tds.ElementAt(0).Value;
-            //var industryPE = tds.ElementAt(1).Value;
 
         }
 
@@ -107,7 +115,7 @@ namespace StockDataTool
             //http://financials.morningstar.com/valuate/current-valuation-list.action?&t=XNAS:AAPL
 
 
-            string exchange = s.Exchange == Exchange.NASDAQ? "XNAS": "XNYS";
+            string exchange = s.Exchange == Exchange.NASDAQ ? "XNAS" : "XNYS";
             string path = $"http://financials.morningstar.com/valuate/current-valuation-list.action?&t={exchange}:{s.Ticker}";
 
             var request = (HttpWebRequest)WebRequest.Create(path);
@@ -128,7 +136,7 @@ namespace StockDataTool
             var stockPE = tds.ElementAt(0).Value;
             var industryPE = tds.ElementAt(1).Value;
 
-            s.PE = double.Parse(stockPE.Replace('.',','));
+            s.PE = double.Parse(stockPE.Replace('.', ','));
             s.industryPE = double.Parse(industryPE.Replace('.', ','));
 
             //PB
@@ -262,7 +270,21 @@ namespace StockDataTool
                 }
                 double average = returns.Average();
                 double sumOfSquaresOfDifferences = returns.Sum(val => (val - average) * (val - average));
-                stock.STD = Math.Sqrt(sumOfSquaresOfDifferences / returns.Count-1);
+                stock.STD = Math.Sqrt(sumOfSquaresOfDifferences / returns.Count - 1);
+            }
+        }
+
+        public static void EnrichStocksWithAvgPEPBs(Portfolio p)
+        {
+            foreach (Stock stock in p.Stocks)
+            {
+                var pes = new List<double>();
+                var pbs = new List<double>();
+                foreach (var row in stock.dataRows)
+                {
+                    pes.Add(row.PE);
+                    pbs.Add(row.PB);
+                }
             }
         }
 
@@ -290,17 +312,18 @@ namespace StockDataTool
 
             //write history rows part
             sw.WriteLine();
-            sw.WriteLine("Stock;Year;Open;Close;Return;P/E;");
+            sw.WriteLine("Stock;Year;Open;Close;Return;P/E;P/B;");
             i += 2;
             foreach (Stock stock in p.Stocks)
             {
                 foreach (HistoryDataRow item in stock.dataRows)
                 {
                     string arFromula = $"=((D{i}/C{i})*100)-100";
-                    string openPrice = item.Open.ToString().Replace(',','.');
+                    string openPrice = item.Open.ToString().Replace(',', '.');
                     string closePrice = item.Close.ToString().Replace(',', '.');
                     string peString = item.PE.ToString().Replace(',', '.');
-                    sw.WriteLine($"{item.Stock};{item.Year};{openPrice};{closePrice};{arFromula};{peString};");
+                    string pbString = item.PB.ToString().Replace(',', '.');
+                    sw.WriteLine($"{item.Stock};{item.Year};{openPrice};{closePrice};{arFromula};{peString};{pbString};");
                     i++;
                 }
             }
