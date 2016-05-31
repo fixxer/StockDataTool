@@ -32,6 +32,8 @@ namespace StockDataTool
             Stocks.Add(new Stock("DIS", Exchange.NYSE));
             Stocks.Add(new Stock("NVDA", Exchange.NASDAQ));
             Stocks.Add(new Stock("ATVI", Exchange.NASDAQ));
+            Stocks.Add(new Stock("CRM", Exchange.NYSE));
+
         }
 
     }

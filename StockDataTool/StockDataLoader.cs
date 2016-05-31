@@ -136,7 +136,9 @@ namespace StockDataTool
             var stockPE = tds.ElementAt(0).Value;
             var industryPE = tds.ElementAt(1).Value;
 
-            s.PE = double.Parse(stockPE.Replace('.', ','));
+            double myPE = 0;
+            if (double.TryParse(stockPE.Replace('.', ','), out myPE))
+                s.PE = myPE; else s.PE = 0;
             s.industryPE = double.Parse(industryPE.Replace('.', ','));
 
             //PB
@@ -285,6 +287,7 @@ namespace StockDataTool
                     pes.Add(row.PE);
                     pbs.Add(row.PB);
                 }
+                double avgPE = pes.Average();
             }
         }
 
@@ -312,20 +315,24 @@ namespace StockDataTool
 
             //write history rows part
             sw.WriteLine();
-            sw.WriteLine("Stock;Year;Open;Close;Return;P/E;P/B;");
-            i += 2;
+            
+            i++;
             foreach (Stock stock in p.Stocks)
             {
+                sw.WriteLine("Stock;Year;Open;Close;Annual Return, %;P/E;P/B;");
+                i++;
                 foreach (HistoryDataRow item in stock.dataRows)
                 {
                     string arFromula = $"=((D{i}/C{i})*100)-100";
                     string openPrice = item.Open.ToString().Replace(',', '.');
                     string closePrice = item.Close.ToString().Replace(',', '.');
-                    string peString = item.PE.ToString().Replace(',', '.');
-                    string pbString = item.PB.ToString().Replace(',', '.');
+                    string peString = item.PE != 0 ? item.PE.ToString().Replace(',', '.') : "-";
+                    string pbString = item.PB != 0 ? item.PB.ToString().Replace(',', '.') : "-";
                     sw.WriteLine($"{item.Stock};{item.Year};{openPrice};{closePrice};{arFromula};{peString};{pbString};");
                     i++;
                 }
+                sw.WriteLine();
+                i++;
             }
             sw.Close();
             fs.Close();
