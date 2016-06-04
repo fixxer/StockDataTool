@@ -17,7 +17,7 @@ namespace StockDataTool
             bw.DoWork += Bw_DoWork;
             bw.ProgressChanged += Bw_ProgressChanged;
             InitializeComponent();
-            progressBar.Maximum = 150;
+            progressBar.Maximum = 170;
             bw.RunWorkerAsync();
         }
 
@@ -70,16 +70,18 @@ namespace StockDataTool
             }
             bw.ReportProgress(120, "...done!\r\n");
 
-            /*n. Generating output. Currently contains:
-                - raw data in rows
-                - ticker
-                - AAR
-            */
-            bw.ReportProgress(130, "Generating xls");
-            StockDataLoader.GenerateMySpreadsheet(ref portfolio);
+            //6. Calculating average and maximum values for P/Es and P/Bs
+            bw.ReportProgress(130, "Calculating average and maximum values for P/Es and P/Bs");
+            StockDataLoader.EnrichStocksWithAvgAndMaxPEPBs(portfolio);
             bw.ReportProgress(140, "...done!\r\n");
 
-            bw.ReportProgress(150, "All done!\r\n");
+            //n. Generating output.
+
+            bw.ReportProgress(150, "Generating xls");
+            StockDataLoader.GenerateMySpreadsheet(ref portfolio);
+            bw.ReportProgress(160, "...done!\r\n");
+
+            bw.ReportProgress(170, "All done!\r\n");
         }
 
         private void goButton_Click(object sender, RoutedEventArgs e)

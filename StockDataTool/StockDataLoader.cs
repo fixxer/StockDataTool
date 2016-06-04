@@ -276,18 +276,24 @@ namespace StockDataTool
             }
         }
 
-        public static void EnrichStocksWithAvgPEPBs(Portfolio p)
+        public static void EnrichStocksWithAvgAndMaxPEPBs(Portfolio p)
         {
             foreach (Stock stock in p.Stocks)
             {
-                var pes = new List<double>();
-                var pbs = new List<double>();
-                foreach (var row in stock.dataRows)
-                {
-                    pes.Add(row.PE);
-                    pbs.Add(row.PB);
-                }
-                double avgPE = pes.Average();
+                //var pes = new List<double>();
+                //var pbs = new List<double>();
+                //foreach (var row in stock.dataRows)
+                //{
+                //    pes.Add(row.PE);
+                //    pbs.Add(row.PB);
+                //}
+                //double avgPE = pes.Average();
+
+                stock.MaxPE = stock.dataRows.Max(i => i.PE);
+                stock.MaxPB = stock.dataRows.Max(i => i.PB);
+
+                stock.AvgPE = stock.dataRows.Average(i => i.PE);
+                stock.AvgPB = stock.dataRows.Average(i => i.PB);
             }
         }
 
@@ -299,7 +305,7 @@ namespace StockDataTool
 
             int i = 2; //counter of used rows for correct file generation
             //write stocks part
-            sw.WriteLine("Stock;Sector;Industry;Stock Type;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);max P/E (10 years);Industry avg. P/E;P/B as of 2016;Industry avg. P/B;Divident Yield;");
+            sw.WriteLine("Stock;Sector;Industry;Stock Type;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);Max P/E (10 years);Avg. P/B (10 years);Max P/B (10 years);Industry avg. P/E;P/B as of 2016;Industry avg. P/B;Divident Yield;;;P/E < avg;P/E < industry avg;P/B < avg;P/B < industry avg;Dividends;R/R > avg.R/R;final decision");
             foreach (Stock stock in p.Stocks)
             {
                 string aarString = stock.AAR.ToString().Replace(',', '.');
@@ -308,7 +314,13 @@ namespace StockDataTool
                 string indPeString = stock.industryPE.ToString().Replace(',', '.');
                 string pbString = stock.PB.ToString().Replace(',', '.');
                 string indPbString = stock.industryPB.ToString().Replace(',', '.');
-                string stockInfo = $"{stock.Ticker};sector;industry;type;style;{aarString};{stdString};=F{i}/G{i};{peString};avgPE;maxPE;{indPeString};{pbString};{indPbString};yield;";
+                string avgPeString = stock.AvgPE.ToString().Replace(',', '.');
+                string avgPbString = stock.AvgPB.ToString().Replace(',', '.');
+                string maxPeString = stock.MaxPE.ToString().Replace(',', '.');
+                string maxPbString = stock.MaxPB.ToString().Replace(',', '.');
+
+                string stockInfo = $"{stock.Ticker};sector;industry;type;style;{aarString};{stdString};=F{i}/G{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};yield;";
+                stockInfo += $";;=I{i}<J{i};=I{i}<N{i};=O{i} < M{i};=O{i} < P{i};=Q{i}>0;R/R > avg.R/R;";
                 sw.WriteLine(stockInfo);
                 i++;
             }
