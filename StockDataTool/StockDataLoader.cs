@@ -150,6 +150,17 @@ namespace StockDataTool
             s.PB = double.Parse(stockPB.Replace('.', ','));
             s.industryPB = double.Parse(industryPB.Replace('.', ','));
 
+            //Divident Yield
+            tr = from el in tbody.Elements("tr") where (string)el.Element("th") == @"Dividend Yield %" select el;
+            tds = tr.Elements("td");
+            var dividents = tds.ElementAt(0).Value;
+            var industryDividents = tds.ElementAt(1).Value; // I don't use it
+
+            double myDivident = 99;
+            if (double.TryParse(dividents.Replace('.', ','), out myDivident))
+                s.DividentYield = myDivident;
+
+
         }
 
 
@@ -318,8 +329,9 @@ namespace StockDataTool
                 string avgPbString = stock.AvgPB.ToString().Replace(',', '.');
                 string maxPeString = stock.MaxPE.ToString().Replace(',', '.');
                 string maxPbString = stock.MaxPB.ToString().Replace(',', '.');
+                string dividentString = stock.DividentYield.ToString().Replace(',', '.');
 
-                string stockInfo = $"{stock.Ticker};sector;industry;type;style;{aarString};{stdString};=F{i}/G{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};yield;";
+                string stockInfo = $"{stock.Ticker};sector;industry;type;style;{aarString};{stdString};=F{i}/G{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};{dividentString};";
                 stockInfo += $";;=I{i}<J{i};=I{i}<N{i};=O{i} < M{i};=O{i} < P{i};=Q{i}>0;R/R > avg.R/R;";
                 sw.WriteLine(stockInfo);
                 i++;
