@@ -341,7 +341,7 @@ namespace StockDataTool
 
             int i = 2; //counter of used rows for correct file generation
             //write stocks part
-            sw.WriteLine("Stock;Sector;Industry;Stock Type;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);Max P/E (10 years);Avg. P/B (10 years);Max P/B (10 years);Industry avg. P/E;P/B as of 2016;Industry avg. P/B;Divident Yield;;;P/E < avg;P/E < industry avg;P/B < avg;P/B < industry avg;Dividends;R/R > avg.R/R;final decision");
+            sw.WriteLine("Stock;Sector;Industry;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);Max P/E (10 years);Avg. P/B (10 years);Max P/B (10 years);Industry avg. P/E;P/B as of 2016;Industry avg. P/B;Divident Yield;;;P/E < avg;P/E < industry avg;P/B < avg;P/B < industry avg;Dividends;R/R > avg.R/R;final decision");
             foreach (Stock stock in p.Stocks)
             {
                 string aarString = stock.AAR.ToString().Replace(',', '.');
@@ -356,8 +356,8 @@ namespace StockDataTool
                 string maxPbString = stock.MaxPB.ToString().Replace(',', '.');
                 string dividentString = stock.DividentYield.ToString().Replace(',', '.');
 
-                string stockInfo = $"{stock.Ticker};{stock.Sector};{stock.Industry};type;{stock.Style};{aarString};{stdString};=F{i}/G{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};{dividentString};";
-                stockInfo += $";;=I{i}<J{i};=I{i}<N{i};=O{i} < M{i};=O{i} < P{i};=Q{i}>0;R/R > avg.R/R;";
+                string stockInfo = $"{stock.Ticker};{stock.Sector};{stock.Industry};{stock.Style};{aarString};{stdString};=E{i}/F{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};{dividentString};";
+                stockInfo += $";;=H{i}<I{i};=H{i}<M{i};=N{i} < N{i};=M{i} < O{i};=P{i}>0;R/R > avg.R/R;";
                 sw.WriteLine(stockInfo);
                 i++;
             }
