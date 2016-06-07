@@ -1,7 +1,9 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.ComponentModel;
+using System.Linq;
 
 
 namespace StockDataTool
@@ -23,7 +25,7 @@ namespace StockDataTool
 
         private void Bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            logTextBox.Text += e.UserState.ToString();
+            logTextBox.Text = e.UserState.ToString()+ logTextBox.Text;
             progressBar.Value = e.ProgressPercentage;
         }
 
@@ -41,12 +43,25 @@ namespace StockDataTool
             bw.ReportProgress(40, "...done!\r\n");
 
             //2. Downloading historical prices data
-            bw.ReportProgress(50, "Downloading historical prices");
+            bw.ReportProgress(50, "Downloading historical prices\r\n");
+            List<Stock> badStocks = new List<Stock>();
             foreach (Stock stock in portfolio.Stocks)
             {
+                bw.ReportProgress(55,$"\t{stock.Ticker}\r\n");
                 var longPath = StockDataLoader.DownloadPricesCsv(stock.Ticker, 2006, 2015);
-                var shortPath = StockDataLoader.ReformatPricesCsv(longPath);
-                StockDataLoader.CreateHistoricalData(stock, shortPath, ref portfolio);
+                if (longPath != "error")
+                {
+                    var shortPath = StockDataLoader.ReformatPricesCsv(longPath);
+                    StockDataLoader.CreateHistoricalData(stock, shortPath, ref portfolio);
+                }
+                else
+                {
+                    badStocks.Add(stock);
+                }
+            }
+            foreach (Stock badStock in badStocks)
+            {
+                portfolio.Stocks.Remove(badStock);
             }
             bw.ReportProgress(60, "...done!\r\n");
 
