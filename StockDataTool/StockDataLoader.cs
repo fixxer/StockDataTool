@@ -109,6 +109,31 @@ namespace StockDataTool
 
         }
 
+        public static void GetBasicMorningstarData(Stock s)
+        {
+            //http://financials.morningstar.com/cmpind/company-profile/component.action?component=BasicData&t=XNAS:FB
+
+            string exchange = s.Exchange == Exchange.NASDAQ ? "XNAS" : "XNYS";
+            string path = $"http://financials.morningstar.com/cmpind/company-profile/component.action?component=BasicData&t={exchange}:{s.Ticker}";
+
+            var request = (HttpWebRequest)WebRequest.Create(path);
+            var response = (HttpWebResponse)request.GetResponse();
+            Stream receiveStream = response.GetResponseStream();
+            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+            string result = readStream.ReadToEnd();
+            receiveStream.Close();
+            response.Close();
+            readStream.Close();
+            result = result.Trim().Replace("S&P", "SnP").Replace("&nbsp;", " ").Replace("&ndash;", "-").Replace("&mdash;", "-");
+            result = result.Replace("&", "n");
+
+            XElement root = XElement.Parse(result);
+
+            s.Sector = root.Element("tbody").Elements("tr").ElementAt(5).Elements("td").ElementAt(2).Value;
+            s.Industry = root.Element("tbody").Elements("tr").ElementAt(5).Elements("td").ElementAt(4).Value;
+            s.Style = root.Element("tbody").Elements("tr").ElementAt(8).Elements("td").ElementAt(0).Value.Trim();
+        }
+
         public static void GetCurrentMorningstarData(Stock s)
         {
             //http://financials.morningstar.com/valuation/price-ratio.html?t=AAPL
@@ -331,7 +356,7 @@ namespace StockDataTool
                 string maxPbString = stock.MaxPB.ToString().Replace(',', '.');
                 string dividentString = stock.DividentYield.ToString().Replace(',', '.');
 
-                string stockInfo = $"{stock.Ticker};sector;industry;type;style;{aarString};{stdString};=F{i}/G{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};{dividentString};";
+                string stockInfo = $"{stock.Ticker};{stock.Sector};{stock.Industry};type;{stock.Style};{aarString};{stdString};=F{i}/G{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};{dividentString};";
                 stockInfo += $";;=I{i}<J{i};=I{i}<N{i};=O{i} < M{i};=O{i} < P{i};=Q{i}>0;R/R > avg.R/R;";
                 sw.WriteLine(stockInfo);
                 i++;

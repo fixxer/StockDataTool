@@ -60,13 +60,14 @@ namespace StockDataTool
             StockDataLoader.EnrichStocksWithSTD(portfolio);
             bw.ReportProgress(100, "...done!\r\n");
 
-            //5. Enriching stocks with P/Es
+            //5. Enriching stocks with P/Es and basic string data
             bw.ReportProgress(110, "Enriching PEs and PBs\r\n");
             foreach (Stock stock in portfolio.Stocks)
             {
-                StockDataLoader.GetCurrentMorningstarData(stock);
                 bw.ReportProgress(110, $"\tEnriching:{stock.Ticker}\r\n");
+                StockDataLoader.GetCurrentMorningstarData(stock);
                 StockDataLoader.GetHistoricalMorningstarData(stock);
+                StockDataLoader.GetBasicMorningstarData(stock);
             }
             bw.ReportProgress(120, "...done!\r\n");
 
@@ -75,7 +76,7 @@ namespace StockDataTool
             StockDataLoader.EnrichStocksWithAvgAndMaxPEPBs(portfolio);
             bw.ReportProgress(140, "...done!\r\n");
 
-            //n. Generating output.
+            //7. Generating output.
 
             bw.ReportProgress(150, "Generating xls");
             StockDataLoader.GenerateMySpreadsheet(ref portfolio);
@@ -87,8 +88,6 @@ namespace StockDataTool
         private void goButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
-
-
         }
 
         private void Window_Closed(object sender, EventArgs e)
