@@ -31,12 +31,13 @@ namespace StockDataTool
         {
             //0. Downloading available tickers
             bw.ReportProgress(10, "Downloading available tickers");
-            StockDataLoader.GetAllTickers();
+            var demTickers = StockDataLoader.GetAllTickers();
+            demTickers.Sort();
             bw.ReportProgress(20, "...done!\r\n");
 
             // 1. Building Portfolio: Tickers. Curerntly the list is pre-defined, may be switched to downloaded at {0}
             bw.ReportProgress(30, "Building portfolio");
-            Portfolio portfolio = new Portfolio();
+            Portfolio portfolio = new Portfolio(demTickers);
             bw.ReportProgress(40, "...done!\r\n");
 
             //2. Downloading historical prices data
@@ -66,8 +67,11 @@ namespace StockDataTool
             {
                 bw.ReportProgress(110, $"\tEnriching:{stock.Ticker}\r\n");
                 StockDataLoader.GetCurrentMorningstarData(stock);
+                System.Threading.Thread.Sleep(100);
                 StockDataLoader.GetHistoricalMorningstarData(stock);
+                System.Threading.Thread.Sleep(100);
                 StockDataLoader.GetBasicMorningstarData(stock);
+                System.Threading.Thread.Sleep(500);
             }
             bw.ReportProgress(120, "...done!\r\n");
 

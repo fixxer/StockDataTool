@@ -33,7 +33,15 @@ namespace StockDataTool
             Stocks.Add(new Stock("NVDA", Exchange.NASDAQ));
             Stocks.Add(new Stock("ATVI", Exchange.NASDAQ));
             Stocks.Add(new Stock("CRM", Exchange.NYSE));
+        }
 
+        public Portfolio(List<string> tickers)
+        {
+            Stocks = new List<Stock>();
+            foreach (string ticker in tickers)
+            {
+                Stocks.Add(new Stock(ticker, Exchange.NASDAQ));
+            }
         }
 
     }

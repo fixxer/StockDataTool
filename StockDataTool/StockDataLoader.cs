@@ -14,16 +14,19 @@ namespace StockDataTool
     class StockDataLoader
     {
 
-        public static void GetAllTickers()
+        public static List<string> GetAllTickers()
         {
             //http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
             //http://bsym.bloomberg.com/sym/ - not used
+
+            List<string> demTickers = new List<string>();
+
             foreach (string industry in Portfolio.Industries)
             {
                 string nasdaqPath = $"http://nasdaq.com/screening/companies-by-industry.aspx?industry={industry}&exchange=NASDAQ&render=download";
                 string localPath = $"NASDAQ_{industry}.csv";
                 string tickersPath = $"NASDAQ_{industry}_tickers.txt";
-                if (!File.Exists(localPath))
+                if (/*!File.Exists(localPath)*/true)
                 {
                     var request = (HttpWebRequest)WebRequest.Create(nasdaqPath);
                     var response = (HttpWebResponse)request.GetResponse();
@@ -46,6 +49,7 @@ namespace StockDataTool
                         var line = sr.ReadLine();
                         var ticker = line.Split(new char[] { ',' })[0].Replace("\"", "");
                         sw.WriteLine(ticker);
+                        demTickers.Add(ticker);
                     }
                     sr.Close();
                     sw.Close();
@@ -53,6 +57,8 @@ namespace StockDataTool
                     tickerFile.Close();
                 }
             }
+
+            return demTickers;
         }
 
 
@@ -194,25 +200,31 @@ namespace StockDataTool
             string fileName = $"{ticker}_{startYear}_{endYear}_long.csv";
             if (!File.Exists(fileName))
             {
+                try
+                {
+                    string path = @"http://real-chart.finance.yahoo.com/table.csv";
+                    string param = "?s=" + ticker + "&a=00&b=1&c=" + startYear + "&d=11&e=31&f=" + endYear +
+                                   "&g=d&ignore=.csv";
+                    path += param;
 
-                string path = @"http://real-chart.finance.yahoo.com/table.csv";
-                string param = "?s=" + ticker + "&a=00&b=1&c=" + startYear + "&d=11&e=31&f=" + endYear + "&g=d&ignore=.csv";
-                path += param;
-
-                var request = (HttpWebRequest)WebRequest.Create(path);
-                var response = (HttpWebResponse)request.GetResponse();
-                Stream receiveStream = response.GetResponseStream();
-                StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                //string result = readStream.ReadToEnd();
+                    var request = (HttpWebRequest) WebRequest.Create(path);
+                    var response = (HttpWebResponse) request.GetResponse();
+                    Stream receiveStream = response.GetResponseStream();
+                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+                    //string result = readStream.ReadToEnd();
 
 
-                FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
-                receiveStream.CopyTo(file);
-                receiveStream.Close();
-                response.Close();
-                readStream.Close();
-                file.Close();
-                //System.Diagnostics.Process.Start(fileName); //for debug purpose only
+                    FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
+                    receiveStream.CopyTo(file);
+                    receiveStream.Close();
+                    response.Close();
+                    readStream.Close();
+                    file.Close();
+                }
+                catch
+                {
+
+                }
             }
             return fileName;
         }
@@ -221,7 +233,54 @@ namespace StockDataTool
         {
             if (!File.Exists(fileName.Replace("long", "short")))
             {
-                var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                try
+                {
+                    var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                    var sr = new StreamReader(fs);
+                    var dataRows = new List<string>();
+                    while (!sr.EndOfStream)
+                    {
+                        dataRows.Add(sr.ReadLine());
+                    }
+                    sr.Close();
+                    fs.Close();
+
+                    var usefulRows = new List<string> {dataRows[1]};
+
+                    for (int i = 2; i < dataRows.Count - 1; i++)
+                    {
+                        if ((dataRows[i].Substring(0, 4) != dataRows[i - 1].Substring(0, 4)) ||
+                            (dataRows[i].Substring(0, 4) != dataRows[i + 1].Substring(0, 4)))
+                        {
+                            usefulRows.Add(dataRows[i]);
+                        }
+                    }
+                    usefulRows.Add(dataRows[dataRows.Count - 1]);
+
+                    fileName = fileName.Replace("long", "short");
+                    FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
+                    StreamWriter sw = new StreamWriter(file);
+                    foreach (string row in usefulRows)
+                    {
+                        sw.WriteLine(row);
+                    }
+                    sw.Close();
+                    file.Close();
+                    //System.Diagnostics.Process.Start(fileName); //for debug purpose only
+                }
+                catch
+                {
+                }
+            }
+            return fileName.Replace("long", "short");
+        }
+
+        public static void CreateHistoricalData(Stock stock, string shortPath, ref Portfolio p)
+        {
+            try
+            {
+
+                var fs = new FileStream(shortPath, FileMode.Open, FileAccess.Read);
                 var sr = new StreamReader(fs);
                 var dataRows = new List<string>();
                 while (!sr.EndOfStream)
@@ -231,55 +290,23 @@ namespace StockDataTool
                 sr.Close();
                 fs.Close();
 
-                var usefulRows = new List<string> { dataRows[1] };
-
-                for (int i = 2; i < dataRows.Count - 1; i++)
+                for (int i = 0; i < dataRows.Count - 1; i += 2)
                 {
-                    if ((dataRows[i].Substring(0, 4) != dataRows[i - 1].Substring(0, 4)) || (dataRows[i].Substring(0, 4) != dataRows[i + 1].Substring(0, 4)))
-                    {
-                        usefulRows.Add(dataRows[i]);
-                    }
+                    //0 - Date, 1 - Open, 2 - High, 3 - Low, 4 - Close, 5 - Volume, 6 - Adj Close
+                    string[] parts1 = dataRows[i].Split(new char[] {','});
+                    string[] parts2 = dataRows[i + 1].Split(new char[] {','});
+                    int year = int.Parse(parts1[0].Substring(0, 4));
+                    double open = double.Parse(parts2[6].Replace('.', ','));
+                    double close = double.Parse(parts1[6].Replace('.', ','));
+                    var historyDataRow = new HistoryDataRow(stock.Ticker, year, open, close);
+                    stock.dataRows.Add(historyDataRow);
+                    //p.HistoryDataRows.Add();
                 }
-                usefulRows.Add(dataRows[dataRows.Count - 1]);
-
-                fileName = fileName.Replace("long", "short");
-                FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
-                StreamWriter sw = new StreamWriter(file);
-                foreach (string row in usefulRows)
-                {
-                    sw.WriteLine(row);
-                }
-                sw.Close();
-                file.Close();
-                //System.Diagnostics.Process.Start(fileName); //for debug purpose only
             }
-            return fileName.Replace("long", "short");
-        }
-
-        public static void CreateHistoricalData(Stock stock, string shortPath, ref Portfolio p)
-        {
-            var fs = new FileStream(shortPath, FileMode.Open, FileAccess.Read);
-            var sr = new StreamReader(fs);
-            var dataRows = new List<string>();
-            while (!sr.EndOfStream)
+            catch
             {
-                dataRows.Add(sr.ReadLine());
             }
-            sr.Close();
-            fs.Close();
 
-            for (int i = 0; i < dataRows.Count - 1; i += 2)
-            {
-                //0 - Date, 1 - Open, 2 - High, 3 - Low, 4 - Close, 5 - Volume, 6 - Adj Close
-                string[] parts1 = dataRows[i].Split(new char[] { ',' });
-                string[] parts2 = dataRows[i + 1].Split(new char[] { ',' });
-                int year = int.Parse(parts1[0].Substring(0, 4));
-                double open = double.Parse(parts2[6].Replace('.', ','));
-                double close = double.Parse(parts1[6].Replace('.', ','));
-                var historyDataRow = new HistoryDataRow(stock.Ticker, year, open, close);
-                stock.dataRows.Add(historyDataRow);
-                //p.HistoryDataRows.Add();
-            }
         }
 
         public static void EnrichStocksWithAAR(Portfolio p)
