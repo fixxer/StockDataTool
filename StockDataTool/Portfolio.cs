@@ -26,13 +26,13 @@ namespace StockDataTool
         {
             Stocks = new List<Stock>();
             Stocks.Add(new Stock("AAPL", Exchange.NASDAQ));
-            ////Stocks.Add(new Stock("MSFT", Exchange.NASDAQ));
-            ////Stocks.Add(new Stock("FB", Exchange.NASDAQ));
-            ////Stocks.Add(new Stock("AMZN", Exchange.NASDAQ));
-            ////Stocks.Add(new Stock("DIS", Exchange.NYSE));
-            ////Stocks.Add(new Stock("NVDA", Exchange.NASDAQ));
-            ////Stocks.Add(new Stock("ATVI", Exchange.NASDAQ));
-            ////Stocks.Add(new Stock("CRM", Exchange.NYSE));
+            Stocks.Add(new Stock("MSFT", Exchange.NASDAQ));
+            Stocks.Add(new Stock("FB", Exchange.NASDAQ));
+            Stocks.Add(new Stock("AMZN", Exchange.NASDAQ));
+            Stocks.Add(new Stock("DIS", Exchange.NYSE));
+            Stocks.Add(new Stock("NVDA", Exchange.NASDAQ));
+            Stocks.Add(new Stock("ATVI", Exchange.NASDAQ));
+            Stocks.Add(new Stock("CRM", Exchange.NYSE));
         }
 
         public Portfolio(List<string> tickers)

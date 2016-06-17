@@ -1,10 +1,7 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.ComponentModel;
-using System.Linq;
-
 
 namespace StockDataTool
 {
@@ -19,7 +16,7 @@ namespace StockDataTool
             bw.DoWork += Bw_DoWork;
             bw.ProgressChanged += Bw_ProgressChanged;
             InitializeComponent();
-            progressBar.Maximum = 170;
+            progressBar.Maximum = 160;
             bw.RunWorkerAsync();
         }
 
@@ -40,8 +37,8 @@ namespace StockDataTool
 
             // 1. Building Portfolio: Tickers
             bw.ReportProgress(30, "Building portfolio");
-            Portfolio portfolio = new Portfolio(demTickers);
-            //Portfolio portfolio = new Portfolio();
+            //Portfolio portfolio = new Portfolio(demTickers);
+            Portfolio portfolio = new Portfolio();
             bw.ReportProgress(40, "...done!\r\n");
 
             //2. Downloading historical prices data
@@ -72,7 +69,6 @@ namespace StockDataTool
             StockDataLoader.EnrichStocksWithAAR(portfolio);
             bw.ReportProgress(80, "...done!\r\n");
 
-
             //4. Enriching stocks with STDs
             bw.ReportProgress(90, "Enriching stocks with STDs");
             StockDataLoader.EnrichStocksWithSTD(portfolio);
@@ -84,11 +80,8 @@ namespace StockDataTool
             {
                 bw.ReportProgress(110, $"\tEnriching:{stock.Ticker}\r\n");
                 StockDataLoader.GetCurrentMorningstarData(stock);
-                //System.Threading.Thread.Sleep(10);
                 StockDataLoader.GetHistoricalMorningstarData(stock);
-                //System.Threading.Thread.Sleep(10);
                 StockDataLoader.GetBasicMorningstarData(stock);
-                //System.Threading.Thread.Sleep(10);
             }
             bw.ReportProgress(120, "...done!\r\n");
 
@@ -98,12 +91,10 @@ namespace StockDataTool
             bw.ReportProgress(140, "...done!\r\n");
 
             //7. Generating output.
-
             bw.ReportProgress(150, "Generating xls");
             StockDataLoader.GenerateMySpreadsheet(ref portfolio);
             bw.ReportProgress(160, "...done!\r\n");
-
-            bw.ReportProgress(170, "All done!\r\n");
+            bw.ReportProgress(160, "All done!\r\n");
         }
 
         private void goButton_Click(object sender, RoutedEventArgs e)

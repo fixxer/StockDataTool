@@ -1,31 +1,12 @@
-﻿
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace StockDataTool
 {
-	
-	/*
-	http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Basic+Industries&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Capital+Goods&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Consumer+Durable&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Consumer+Non-Durables&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Consumer+Services&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Energy&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Finance&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Health+Care&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Miscellaneous&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Public+Utilities&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Technology&exchange=NASDAQ&render=download
-http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
-	*/
-	
     public enum Exchange
     {
         NASDAQ, NYSE,
     }
     
-
     class Stock
     {
 		public string Ticker { get; set; }
@@ -48,11 +29,7 @@ http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportati
         public double AvgPB { get; set; }
         public double MaxPB { get; set; }
         public double DividentYield { get; set; }
-        /*
-		stock type
-		stock style
-		RR
-		*/
+
 
         public Stock() { dataRows = new List<HistoryDataRow>(); }
         public Stock(string ticker, Exchange ex)

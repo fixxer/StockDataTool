@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.IO;
 using System.Text;
-//using System.Web;
-using System.Windows;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace StockDataTool
@@ -18,6 +15,20 @@ namespace StockDataTool
 
         public static List<string> GetAllTickers()
         {
+            /*
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Basic+Industries&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Capital+Goods&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Consumer+Durable&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Consumer+Non-Durables&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Consumer+Services&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Energy&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Finance&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Health+Care&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Miscellaneous&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Public+Utilities&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Technology&exchange=NASDAQ&render=download
+                http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
+            */
             //http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
             //http://bsym.bloomberg.com/sym/ - not used
 
@@ -41,10 +52,10 @@ namespace StockDataTool
                     readStream.Close();
                     file.Close();
                 }
-                FileStream localFile = new FileStream(localPath, FileMode.Open, FileAccess.Read);
-                StreamReader sr = new StreamReader(localFile);
-                FileStream tickerFile = new FileStream(tickersPath, FileMode.Create, FileAccess.Write);
-                StreamWriter sw = new StreamWriter(tickerFile);
+                var localFile = new FileStream(localPath, FileMode.Open, FileAccess.Read);
+                var sr = new StreamReader(localFile);
+                var tickerFile = new FileStream(tickersPath, FileMode.Create, FileAccess.Write);
+                var sw = new StreamWriter(tickerFile);
                 sr.ReadLine();//skipping one line with headers
                 while (!sr.EndOfStream)
                 {
@@ -208,7 +219,6 @@ namespace StockDataTool
                     response.Close();
                     readStream.Close();
                     ok = 5;
-
                 }
                 catch (WebException)
                 {
@@ -221,6 +231,7 @@ namespace StockDataTool
             result = result.Replace("&", "n");
 
             XElement root = new XElement("dummy");
+
             try
             {
                 root = XElement.Parse(result);
@@ -274,11 +285,9 @@ namespace StockDataTool
                 s.industryPE = 0;
                 s.PB = 0;
                 s.industryPB = 0;
-                s.DividentYield = 99;
+                s.DividentYield = 0;
             }
-
         }
-
 
         public static string DownloadPricesCsv(string ticker, int startYear, int endYear)
         {
@@ -294,10 +303,8 @@ namespace StockDataTool
 
                     var request = (HttpWebRequest)WebRequest.Create(path);
                     var response = (HttpWebResponse)request.GetResponse();
-                    Stream receiveStream = response.GetResponseStream();
-                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    //string result = readStream.ReadToEnd();
-
+                    var receiveStream = response.GetResponseStream();
+                    var readStream = new StreamReader(receiveStream, Encoding.UTF8);
 
                     FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
                     receiveStream.CopyTo(file);
@@ -351,10 +358,10 @@ namespace StockDataTool
                     }
                     sw.Close();
                     file.Close();
-                    //System.Diagnostics.Process.Start(fileName); //for debug purpose only
                 }
                 catch
                 {
+                    // ignored
                 }
             }
             return fileName.Replace("long", "short");
@@ -437,14 +444,6 @@ namespace StockDataTool
         {
             foreach (Stock stock in p.Stocks)
             {
-                //var pes = new List<double>();
-                //var pbs = new List<double>();
-                //foreach (var row in stock.dataRows)
-                //{
-                //    pes.Add(row.PE);
-                //    pbs.Add(row.PB);
-                //}
-                //double avgPE = pes.Average();
                 if (stock.dataRows.Count > 0)
                 {
                     stock.MaxPE = stock.dataRows.Max(i => i.PE);
@@ -458,26 +457,27 @@ namespace StockDataTool
 
         public static void GenerateMySpreadsheet(ref Portfolio p)
         {
-            string dateStr = DateTime.Now.Ticks.ToString();
-            FileStream fs = new FileStream($"{dateStr}_Stocks.csv", FileMode.CreateNew, FileAccess.Write);
-            StreamWriter sw = new StreamWriter(fs);
+            var dateStr = DateTime.Now.Ticks.ToString();
+            var fs = new FileStream($"{dateStr}_Stocks.csv", FileMode.CreateNew, FileAccess.Write);
+            var sw = new StreamWriter(fs);
 
             int i = 2; //counter of used rows for correct file generation
+            
             //write stocks part
             sw.WriteLine("Stock;Sector;Industry;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);Max P/E (10 years);Avg. P/B (10 years);Max P/B (10 years);Industry avg. P/E;P/B as of 2016;Industry avg. P/B;Divident Yield;;;P/E < avg;P/E < industry avg;P/B < avg;P/B < industry avg;Dividends;R/R > avg.R/R;final decision");
             foreach (Stock stock in p.Stocks)
             {
-                string aarString = stock.AAR.ToString().Replace(',', '.');
-                string stdString = stock.STD.ToString().Replace(',', '.');
-                string peString = stock.PE.ToString().Replace(',', '.');
-                string indPeString = stock.industryPE.ToString().Replace(',', '.');
-                string pbString = stock.PB.ToString().Replace(',', '.');
-                string indPbString = stock.industryPB.ToString().Replace(',', '.');
-                string avgPeString = stock.AvgPE.ToString().Replace(',', '.');
-                string avgPbString = stock.AvgPB.ToString().Replace(',', '.');
-                string maxPeString = stock.MaxPE.ToString().Replace(',', '.');
-                string maxPbString = stock.MaxPB.ToString().Replace(',', '.');
-                string dividentString = stock.DividentYield.ToString().Replace(',', '.');
+                var aarString = stock.AAR.ToString().Replace(',', '.');
+                var stdString = stock.STD.ToString().Replace(',', '.');
+                var peString = stock.PE.ToString().Replace(',', '.');
+                var indPeString = stock.industryPE.ToString().Replace(',', '.');
+                var pbString = stock.PB.ToString().Replace(',', '.');
+                var indPbString = stock.industryPB.ToString().Replace(',', '.');
+                var avgPeString = stock.AvgPE.ToString().Replace(',', '.');
+                var avgPbString = stock.AvgPB.ToString().Replace(',', '.');
+                var maxPeString = stock.MaxPE.ToString().Replace(',', '.');
+                var maxPbString = stock.MaxPB.ToString().Replace(',', '.');
+                var dividentString = stock.DividentYield.ToString().Replace(',', '.');
 
                 string stockInfo = $"{stock.Ticker};{stock.Sector};{stock.Industry};{stock.Style};{aarString};{stdString};=E{i}/F{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};{dividentString};";
                 stockInfo += $";;=H{i}<I{i};=H{i}<M{i};=N{i}<K{i};=N{i}<O{i};=P{i}>0;R/R > avg.R/R;";
@@ -509,6 +509,5 @@ namespace StockDataTool
             sw.Close();
             fs.Close();
         }
-
     }
 }
