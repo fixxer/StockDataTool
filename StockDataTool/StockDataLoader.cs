@@ -68,15 +68,35 @@ namespace StockDataTool
             string exchange = s.Exchange == Exchange.NASDAQ ? "XNAS" : "XNYS";
             string path = $"http://financials.morningstar.com/valuate/valuation-history.action?&t={exchange}:{s.Ticker}&type=price-earnings";
 
-            var request = (HttpWebRequest)WebRequest.Create(path);
-            var response = (HttpWebResponse)request.GetResponse();
-            Stream receiveStream = response.GetResponseStream();
-            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-            string result = readStream.ReadToEnd();
-            receiveStream.Close();
-            response.Close();
-            readStream.Close();
-            result = result.Trim().Replace("S&P", "SnP").Replace("&nbsp;", " ").Replace("&ndash;", "-").Replace("&mdash;", "-");
+            int ok = 0;
+            string result = "";
+            while (ok < 5)
+            {
+                try
+                {
+                    var request = (HttpWebRequest)WebRequest.Create(path);
+                    var response = (HttpWebResponse)request.GetResponse();
+                    Stream receiveStream = response.GetResponseStream();
+                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+                    result = readStream.ReadToEnd();
+                    receiveStream.Close();
+                    response.Close();
+                    readStream.Close();
+                    ok = 5;
+                }
+                catch (WebException)
+                {
+                    Thread.Sleep(50);
+                    ok++;
+                }
+            }
+
+            result =
+                        result.Trim()
+                            .Replace("S&P", "SnP")
+                            .Replace("&nbsp;", " ")
+                            .Replace("&ndash;", "-")
+                            .Replace("&mdash;", "-");
             result = "<myRoot>" + result + "</myRoot>";
 
             XElement root = new XElement("dummy");
@@ -187,11 +207,13 @@ namespace StockDataTool
                     receiveStream.Close();
                     response.Close();
                     readStream.Close();
-                    ok++;
+                    ok = 5;
+
                 }
                 catch (WebException)
                 {
-                   Thread.Sleep(100);
+                    Thread.Sleep(50);
+                    ok++;
                 }
             }
 
@@ -254,7 +276,7 @@ namespace StockDataTool
                 s.industryPB = 0;
                 s.DividentYield = 99;
             }
-            
+
         }
 
 
@@ -458,7 +480,7 @@ namespace StockDataTool
                 string dividentString = stock.DividentYield.ToString().Replace(',', '.');
 
                 string stockInfo = $"{stock.Ticker};{stock.Sector};{stock.Industry};{stock.Style};{aarString};{stdString};=E{i}/F{i};{peString};{avgPeString};{maxPeString};{avgPbString};{maxPbString};{indPeString};{pbString};{indPbString};{dividentString};";
-                stockInfo += $";;=H{i}<I{i};=H{i}<M{i};=N{i} < N{i};=M{i} < O{i};=P{i}>0;R/R > avg.R/R;";
+                stockInfo += $";;=H{i}<I{i};=H{i}<M{i};=N{i}<K{i};=N{i}<O{i};=P{i}>0;R/R > avg.R/R;";
                 sw.WriteLine(stockInfo);
                 i++;
             }

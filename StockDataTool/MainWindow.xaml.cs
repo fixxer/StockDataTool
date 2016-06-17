@@ -25,7 +25,8 @@ namespace StockDataTool
 
         private void Bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            logTextBox.Text = e.UserState.ToString()+ logTextBox.Text;
+            logTextBox.AppendText(e.UserState.ToString());
+            logTextBox.ScrollToEnd();
             progressBar.Value = e.ProgressPercentage;
         }
 
@@ -37,9 +38,10 @@ namespace StockDataTool
             demTickers.Sort();
             bw.ReportProgress(20, "...done!\r\n");
 
-            // 1. Building Portfolio: Tickers. Curerntly the list is pre-defined, may be switched to downloaded at {0}
+            // 1. Building Portfolio: Tickers
             bw.ReportProgress(30, "Building portfolio");
             Portfolio portfolio = new Portfolio(demTickers);
+            //Portfolio portfolio = new Portfolio();
             bw.ReportProgress(40, "...done!\r\n");
 
             //2. Downloading historical prices data
@@ -82,11 +84,11 @@ namespace StockDataTool
             {
                 bw.ReportProgress(110, $"\tEnriching:{stock.Ticker}\r\n");
                 StockDataLoader.GetCurrentMorningstarData(stock);
-                System.Threading.Thread.Sleep(100);
+                //System.Threading.Thread.Sleep(10);
                 StockDataLoader.GetHistoricalMorningstarData(stock);
-                System.Threading.Thread.Sleep(100);
+                //System.Threading.Thread.Sleep(10);
                 StockDataLoader.GetBasicMorningstarData(stock);
-                System.Threading.Thread.Sleep(500);
+                //System.Threading.Thread.Sleep(10);
             }
             bw.ReportProgress(120, "...done!\r\n");
 
