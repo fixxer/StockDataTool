@@ -29,7 +29,7 @@ namespace StockDataTool
                 http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Technology&exchange=NASDAQ&render=download
                 http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
             */
-            //http://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Transportation&exchange=NASDAQ&render=download
+
             //http://bsym.bloomberg.com/sym/ - not used
 
             List<string> demTickers = new List<string>();
@@ -51,8 +51,10 @@ namespace StockDataTool
                 }
                 var localFile = new FileStream(localPath, FileMode.Open, FileAccess.Read);
                 var sr = new StreamReader(localFile);
+
                 var tickerFile = new FileStream(tickersPath, FileMode.Create, FileAccess.Write);
                 var sw = new StreamWriter(tickerFile);
+
                 sr.ReadLine();//skipping one line with headers
                 while (!sr.EndOfStream)
                 {
@@ -76,28 +78,30 @@ namespace StockDataTool
             string exchange = s.Exchange == Exchange.NASDAQ ? "XNAS" : "XNYS";
             string path = $"http://financials.morningstar.com/valuate/valuation-history.action?&t={exchange}:{s.Ticker}&type=price-earnings";
 
-            int ok = 0;
-            string result = "";
-            while (ok < 5)
-            {
-                try
-                {
-                    var request = (HttpWebRequest)WebRequest.Create(path);
-                    var response = (HttpWebResponse)request.GetResponse();
-                    Stream receiveStream = response.GetResponseStream();
-                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    result = readStream.ReadToEnd();
-                    receiveStream.Close();
-                    response.Close();
-                    readStream.Close();
-                    ok = 5;
-                }
-                catch (WebException)
-                {
-                    Thread.Sleep(50);
-                    ok++;
-                }
-            }
+            //int ok = 0;
+            //string result = "";
+            //while (ok < 5)
+            //{
+            //    try
+            //    {
+            //        var request = (HttpWebRequest)WebRequest.Create(path);
+            //        var response = (HttpWebResponse)request.GetResponse();
+            //        Stream receiveStream = response.GetResponseStream();
+            //        StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+            //        result = readStream.ReadToEnd();
+            //        receiveStream.Close();
+            //        response.Close();
+            //        readStream.Close();
+            //        ok = 5;
+            //    }
+            //    catch (WebException)
+            //    {
+            //        Thread.Sleep(50);
+            //        ok++;
+            //    }
+            //}
+
+            string result = Helpers.HandleWebRequest(path);
 
             result =
                         result.Trim()
@@ -269,12 +273,14 @@ namespace StockDataTool
                 tr = from el in tbody.Elements("tr") where (string)el.Element("th") == @"Dividend Yield %" select el;
                 tds = tr.Elements("td");
                 var dividents = tds.ElementAt(0).Value;
-                var industryDividents = tds.ElementAt(1).Value; // I don't use it
+                //var industryDividents = tds.ElementAt(1).Value; // I don't use it
 
-                double myDivident = 99;
+                double myDivident = 0;
                 if (double.TryParse(dividents.Replace('.', ','), out myDivident))
-                    s.DividentYield = myDivident;
-                else s.DividentYield = 99;
+                {
+                }
+                s.DividentYield = myDivident;
+                //else s.DividentYield = 0;
             }
             catch
             {
@@ -406,10 +412,7 @@ namespace StockDataTool
                 int years = stock.dataRows.Count;
                 if (years > 0)
                 {
-                    foreach (var row in stock.dataRows)
-                    {
-                        aar += row.AnnualReturn;
-                    }
+                    aar += stock.dataRows.Sum(row => row.AnnualReturn);
                     aar = aar / years;
                     stock.AAR = aar;
                 }
@@ -425,10 +428,7 @@ namespace StockDataTool
                 var returns = new List<double>();
                 if (stock.dataRows.Count > 0)
                 {
-                    foreach (var row in stock.dataRows)
-                    {
-                        returns.Add(row.AnnualReturn);
-                    }
+                    returns.AddRange(stock.dataRows.Select(row => row.AnnualReturn));
                     double average = returns.Average();
                     double sumOfSquaresOfDifferences = returns.Sum(val => (val - average) * (val - average));
                     stock.STD = Math.Sqrt(sumOfSquaresOfDifferences / returns.Count - 1);
@@ -439,16 +439,13 @@ namespace StockDataTool
 
         public static void EnrichStocksWithAvgAndMaxPEPBs(Portfolio p)
         {
-            foreach (Stock stock in p.Stocks)
+            foreach (Stock stock in p.Stocks.Where(stock => stock.dataRows.Count > 0))
             {
-                if (stock.dataRows.Count > 0)
-                {
-                    stock.MaxPE = stock.dataRows.Max(i => i.PE);
-                    stock.MaxPB = stock.dataRows.Max(i => i.PB);
+                stock.MaxPE = stock.dataRows.Max(i => i.PE);
+                stock.MaxPB = stock.dataRows.Max(i => i.PB);
 
-                    stock.AvgPE = stock.dataRows.Average(i => i.PE);
-                    stock.AvgPB = stock.dataRows.Average(i => i.PB);
-                }
+                stock.AvgPE = stock.dataRows.Average(i => i.PE);
+                stock.AvgPB = stock.dataRows.Average(i => i.PB);
             }
         }
 
