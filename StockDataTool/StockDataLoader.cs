@@ -41,16 +41,13 @@ namespace StockDataTool
                 string tickersPath = $"NASDAQ_{industry}_tickers.txt";
                 if (!File.Exists(localPath))
                 {
-                    var request = (HttpWebRequest)WebRequest.Create(nasdaqPath);
-                    var response = (HttpWebResponse)request.GetResponse();
-                    Stream receiveStream = response.GetResponseStream();
-                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    FileStream file = new FileStream(localPath, FileMode.Create, FileAccess.ReadWrite);
-                    receiveStream.CopyTo(file);
-                    receiveStream.Close();
-                    response.Close();
-                    readStream.Close();
-                    file.Close();
+                    using (var receiveStream = WebRequest.Create(nasdaqPath).GetResponse().GetResponseStream())
+                    {
+                        using (FileStream file = new FileStream(localPath, FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            receiveStream.CopyTo(file);
+                        }
+                    }
                 }
                 var localFile = new FileStream(localPath, FileMode.Open, FileAccess.Read);
                 var sr = new StreamReader(localFile);
