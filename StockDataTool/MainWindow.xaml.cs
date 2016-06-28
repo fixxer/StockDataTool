@@ -66,12 +66,14 @@ namespace StockDataTool
 
             bw.ReportProgress(70, "Enriching stocks with AAR data");
             //3. Enriching stocks with AAR data
-            StockDataLoader.EnrichStocksWithAAR(portfolio);
+            foreach (Stock stock in portfolio.Stocks)
+                StockDataLoader.EnrichStockWithAAR(stock);
             bw.ReportProgress(80, "...done!\r\n");
 
             //4. Enriching stocks with STDs
             bw.ReportProgress(90, "Enriching stocks with STDs");
-            StockDataLoader.EnrichStocksWithSTD(portfolio);
+            foreach (Stock stock in portfolio.Stocks)
+                StockDataLoader.EnrichStockWithSTD(stock);
             bw.ReportProgress(100, "...done!\r\n");
 
             //5. Enriching stocks with P/Es and basic string data

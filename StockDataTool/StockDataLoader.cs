@@ -72,7 +72,6 @@ namespace StockDataTool
             return demTickers;
         }
 
-
         public static void GetHistoricalMorningstarData(Stock s)
         {
             string exchange = s.Exchange == Exchange.NASDAQ ? "XNAS" : "XNYS";
@@ -404,6 +403,7 @@ namespace StockDataTool
 
         }
 
+        [Obsolete("EnrichStocksWithAAR is deprecated, please use EnrichStockWithAAR instead.")]
         public static void EnrichStocksWithAAR(Portfolio p)
         {
             foreach (Stock stock in p.Stocks)
@@ -417,10 +417,23 @@ namespace StockDataTool
                     stock.AAR = aar;
                 }
                 else stock.AAR = 0;
-
             }
         }
 
+        public static void EnrichStockWithAAR(Stock stock)
+        {
+            double aar = 0;
+            int years = stock.dataRows.Count;
+            if (years > 0)
+            {
+                aar += stock.dataRows.Sum(row => row.AnnualReturn);
+                aar = aar / years;
+                stock.AAR = aar;
+            }
+            else stock.AAR = 0;
+        }
+
+        [Obsolete("EnrichStocksWithSTD is deprecated, please use EnrichStockWithSTD instead.")]
         public static void EnrichStocksWithSTD(Portfolio p)
         {
             foreach (Stock stock in p.Stocks)
@@ -435,6 +448,19 @@ namespace StockDataTool
                 }
                 else stock.STD = 0;
             }
+        }
+
+        public static void EnrichStockWithSTD(Stock stock)
+        {
+            var returns = new List<double>();
+            if (stock.dataRows.Count > 0)
+            {
+                returns.AddRange(stock.dataRows.Select(row => row.AnnualReturn));
+                double average = returns.Average();
+                double sumOfSquaresOfDifferences = returns.Sum(val => (val - average) * (val - average));
+                stock.STD = Math.Sqrt(sumOfSquaresOfDifferences / returns.Count - 1);
+            }
+            else stock.STD = 0;
         }
 
         public static void EnrichStocksWithAvgAndMaxPEPBs(Portfolio p)
@@ -456,7 +482,7 @@ namespace StockDataTool
             var sw = new StreamWriter(fs);
 
             int i = 2; //counter of used rows for correct file generation
-            
+
             //write stocks part
             sw.WriteLine("Stock;Sector;Industry;Stock Style;AAR, %;STD;Retrun-Risk ratio;P/E as of 2016;Avg. P/E (10 years);Max P/E (10 years);Avg. P/B (10 years);Max P/B (10 years);Industry avg. P/E;P/B as of 2016;Industry avg. P/B;Divident Yield;;;P/E < avg;P/E < industry avg;P/B < avg;P/B < industry avg;Dividends;R/R > avg.R/R;final decision");
             foreach (Stock stock in p.Stocks)
